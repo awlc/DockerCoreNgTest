@@ -1,0 +1,48 @@
+﻿1. create dockerfile as below link described
+https://docs.docker.com/engine/examples/dotnetcore/#build-and-run-the-docker-image
+FROM microsoft/dotnet:2.1-sdk AS build-env
+WORKDIR /app
+
+# Copy everything and restore as distinct layers
+COPY . ./
+RUN dotnet restore
+
+# build+publish
+RUN dotnet publish -c Release -o out
+
+# Build runtime image
+FROM microsoft/dotnet:2.1-aspnetcore-runtime
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "aspnetapp.dll"]
+
+
+2. add nodejs to image as below link described
+(don't need npm install)
+(use latest node version)
+https://www.codeproject.com/Articles/1246748/Angular-within-ASP-NET-Core
+# Setup node
+ENV NODE_VERSION 8.11.3
+ENV NODE_DOWNLOAD_SHA 1ea408e9a467ed4571730e160993f67a100e8c347f6f9891c9a83350df2bf2be
+
+RUN curl -SL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.gz" --output nodejs.tar.gz \
+    && echo "$NODE_DOWNLOAD_SHA nodejs.tar.gz" | sha256sum -c - \
+    && tar -xzf "nodejs.tar.gz" -C /usr/local --strip-components=1 \
+    && rm nodejs.tar.gz \
+    && ln -s /usr/local/bin/node /usr/local/bin/nodejs\
+    && npm i -g @angular/cli npm i -g @angular/cli
+
+
+3. create .dockerignore
+bin\
+obj\
+
+
+4. build image
+docker build -t dockercorengtest .
+
+
+5. create container with https support as below link described
+(using dev. cert)
+https://github.com/dotnet/dotnet-docker/blob/master/samples/aspnetapp/aspnetcore-docker-https.md
+docker run --rm -it -p 5000:80 -p 5001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=5001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="P@ssw0rd" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/dockercorengtest.pfx -v %USERPROFILE%\.aspnet\https:/https/ dockercorengtest
