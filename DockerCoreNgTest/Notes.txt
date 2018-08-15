@@ -50,4 +50,4 @@ dotnet dev-certs https --trust
 
 6. create container with https support as below link described
 (using dev. cert)
-docker run --rm -it -p 5000:80 -p 5001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=5001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="P@ssw0rd" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/dockercorengtest.pfx -v %USERPROFILE%\.aspnet\https:/https/ dockercorengtest
+docker run -d -p 5000:80 -p 5001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=5001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="P@ssw0rd" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/dockercorengtest.pfx -v %USERPROFILE%\.aspnet\https:/https/ alancheung00/dockercorengtest:dev
